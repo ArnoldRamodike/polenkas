@@ -21,6 +21,7 @@ createConnection().then(db  => {
             channel.assertQueue("product_gets", {durable: false} )
             channel.assertQueue("product_created", {durable: false} )
             channel.assertQueue("product_updated", {durable: false} )
+            channel.assertQueue("product_liked", {durable: false} )
             channel.assertQueue("product_deleted", {durable: false} )
 
 
@@ -52,6 +53,11 @@ createConnection().then(db  => {
         
         console.log("Product Displays all here");
 
+        
+    }, {noAck: true});
+    
+    channel.consume("product_liked", async (msg) =>{  
+        console.log("Admin liked successfully");
         
     }, {noAck: true});
 

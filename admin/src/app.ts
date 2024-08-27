@@ -63,7 +63,9 @@ createConnection().then(db  => {
             app.post("/api/products/:id/like",  async  (req: Request, res: Response ) => {
                 const product = await productRepository.findOneById( req.params.id);
                 product.likes++;
+             
                 const result = await productRepository.save(product);
+                channel.sendToQueue("product_liked", Buffer.from(JSON.stringify(result)));
                 return res.send(result);
             } );
         
