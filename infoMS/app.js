@@ -1,11 +1,13 @@
-// const express = require('express');
-// const bodyParsr = require('body-parser');
-// const dotenv = require('dotenv')
+const express = require('express');
+const bodyParsr = require('body-parser');
+const dotenv = require('dotenv')
+const Producer = require('./producer');
+const producer = new Producer;
 const amqp = require("amqplib");
 
-// const app = express();
+const app = express();
 
-// app.use(bodyParsr.json("application/json"));
+app.use(bodyParsr.json("application/json"));
 
 // step 1 : Connect tot the rabbitmq server
 // step 2 : Create a new channel
@@ -14,6 +16,10 @@ const amqp = require("amqplib");
 // step 5 : Bind the queu to the exchange
 // step 6 : Consume message from the queu
 
+app.post("/sendLog", async(req, res, next) => {
+   await  producer.publishMessage(req.body.logType, req.body.message);
+   res.send();
+})
 
 async function consumeMessages(){
  const connection  = await amqp.connect('amqp://localhost');
@@ -36,9 +42,9 @@ async function consumeMessages(){
 
 consumeMessages();
 
-// const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3001;
 
-// app.listen(port, () => {
-//     console.log(`Server started on port ${port}`);
+app.listen(port, () => {
+    console.log(`Server started on port ${port}`);
     
-// })
+})
