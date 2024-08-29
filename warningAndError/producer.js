@@ -32,7 +32,7 @@ class Producer {
             Buffer.from(JSON.stringify(logDetails))
           );
 
-          console.log(`The message ${message} is sent to exchange ${exchangeName} from INFO Producer`);
+          console.log(`The message ${message} is sent to exchange ${exchangeName} from Warning/Error`);
           
     }
 
