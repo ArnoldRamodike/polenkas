@@ -42,9 +42,10 @@ var typeorm_1 = require("typeorm");
 var amqp = require("amqplib/callback_api");
 var product_1 = require("./entity/product");
 var axios_1 = require("axios");
+var config = require('./config');
 (0, typeorm_1.createConnection)().then(function (db) {
     var productRepository = db.getMongoRepository(product_1.Product);
-    amqp.connect(process.env.RABBITMQ_CONNECTION, function (error0, connection) {
+    amqp.connect(config.rabbitMQ.url, function (error0, connection) {
         if (error0) {
             throw error0;
         }
@@ -55,6 +56,7 @@ var axios_1 = require("axios");
             channel.assertQueue("product_gets", { durable: false });
             channel.assertQueue("product_created", { durable: false });
             channel.assertQueue("product_updated", { durable: false });
+            channel.assertQueue("product_liked", { durable: false });
             channel.assertQueue("product_deleted", { durable: false });
             var app = express();
             app.use(cors({
@@ -86,15 +88,20 @@ var axios_1 = require("axios");
                     return [2 /*return*/];
                 });
             }); }, { noAck: true });
+            // channel.consume("product_liked", async (msg) =>{  
+            //     console.log("Admin liked successfully");
+            // }, {noAck: true});
             channel.consume("product_updated", function (msg) { return __awaiter(void 0, void 0, void 0, function () {
                 var eventroduct, product;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             eventroduct = JSON.parse(msg.content.toString());
-                            return [4 /*yield*/, productRepository.findOneById(parseInt(eventroduct.id))];
+                            console.log("eventroduct: ", eventroduct);
+                            return [4 /*yield*/, productRepository.findOneById(eventroduct.id)];
                         case 1:
                             product = _a.sent();
+                            console.log("Product: ", product);
                             productRepository.merge(product, {
                                 title: eventroduct.title,
                                 image: eventroduct.image,

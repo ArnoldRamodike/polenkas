@@ -3,12 +3,13 @@ import * as cors from 'cors'
 import {createConnection} from "typeorm"
 import { Request, Response } from 'express';
 import { Product } from './entity/product';
-import * as amqp from 'amqplib/callback_api'
+import * as amqp from 'amqplib/callback_api';
+const config = require('./config');
 
 createConnection().then(db  => {
     const productRepository = db.getRepository(Product);
 
-    amqp.connect(process.env.RABBITMQ_CONNECTION,  (error0, connection) => {
+    amqp.connect(config.rabbitMQ.url,  (error0, connection) => {
         if (error0) {
             throw error0;
         }
@@ -65,7 +66,7 @@ createConnection().then(db  => {
                 product.likes++;
              
                 const result = await productRepository.save(product);
-                channel.sendToQueue("product_liked", Buffer.from(JSON.stringify(result)));
+                // channel.sendToQueue("product_liked", Buffer.from(JSON.stringify(result)));
                 return res.send(result);
             } );
         

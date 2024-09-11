@@ -5,11 +5,12 @@ import { Request, Response } from 'express';
 import * as amqp from 'amqplib/callback_api'
 import { Product } from './entity/product';
 import axios from 'axios';
+const config = require('./config');
 
 createConnection().then(db  => {
    const productRepository = db.getMongoRepository(Product);
 
-    amqp.connect(process.env.RABBITMQ_CONNECTION,  (error0, connection) => {
+    amqp.connect(config.rabbitMQ.url,  (error0, connection) => {
         if (error0) {
             throw error0;
         }
@@ -56,15 +57,19 @@ createConnection().then(db  => {
         
     }, {noAck: true});
     
-    channel.consume("product_liked", async (msg) =>{  
-        console.log("Admin liked successfully");
+    // channel.consume("product_liked", async (msg) =>{  
+    //     console.log("Admin liked successfully");
         
-    }, {noAck: true});
+        
+    // }, {noAck: true});
 
     channel.consume("product_updated", async (msg) =>{
         const eventroduct: Product = JSON.parse(msg.content.toString());
 
-        const product = await productRepository.findOneById(parseInt(eventroduct.id));
+        console.log("eventroduct: ", eventroduct);
+        
+        const product = await productRepository.findOneById(eventroduct.admin_id);
+        console.log("Product: ", product);
 
         productRepository.merge(product, {
         title : eventroduct.title,

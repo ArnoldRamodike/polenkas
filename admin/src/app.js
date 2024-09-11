@@ -41,9 +41,10 @@ var cors = require("cors");
 var typeorm_1 = require("typeorm");
 var product_1 = require("./entity/product");
 var amqp = require("amqplib/callback_api");
+var config = require('./config');
 (0, typeorm_1.createConnection)().then(function (db) {
     var productRepository = db.getRepository(product_1.Product);
-    amqp.connect('amqps://tpdwkhhz:007vB3O0uMKHBqZV2FC3LeVizFzWfwI_@vulture.rmq.cloudamqp.com/tpdwkhhz', function (error0, connection) {
+    amqp.connect(config.rabbitMQ.url, function (error0, connection) {
         if (error0) {
             throw error0;
         }
@@ -135,6 +136,7 @@ var amqp = require("amqplib/callback_api");
                             return [4 /*yield*/, productRepository.save(product)];
                         case 2:
                             result = _a.sent();
+                            // channel.sendToQueue("product_liked", Buffer.from(JSON.stringify(result)));
                             return [2 /*return*/, res.send(result)];
                     }
                 });
